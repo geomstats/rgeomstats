@@ -13,13 +13,21 @@
 #   Check Package:             'Ctrl + Shift + E'
 #   Test Package:              'Ctrl + Shift + T'
 
+#roxygen2 documentation will be run with roxygen2::roxygenise()
+#roxygen2 generates mans with documentation embedded next to code
+#documentation found in man folder and functions by ?<function>
 
-#' Hello, World function
+#' Function name
 #'
-#' This is a test for roxygen2 documentation
-#' @param none
+#' more detailed description
+#'
+#' @param x numeric vector
+#'
 #' @return hello, world
-#' @export
+#'
+#'
+#' @examples
+#' hello()
 
 hello <- function() {
   print("Hello, world!")
