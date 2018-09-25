@@ -1,4 +1,4 @@
-Package: geomstats
+Package: r-geomstats
 Type: Package
 Title: geomstats for R
 Version: 1.1.0
