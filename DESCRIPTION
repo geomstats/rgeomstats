@@ -1,6 +1,6 @@
 Package: r-geomstats
 Type: Package
-Title: geomstats for R
+Title: Geomstats for R
 Version: 1.1.0
 Author: John Lund
 Maintainer: <jrlund@stanford.edu>
