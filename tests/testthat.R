@@ -1,4 +1,4 @@
 library(testthat)
-library(r-geomstats)
+library(rgeomstats)
 
-test_check("r-geomstats")
+test_check("rgeomstats")
