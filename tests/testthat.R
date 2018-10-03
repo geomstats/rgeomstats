@@ -1,4 +1,5 @@
 library(testthat)
 library(rgeomstats)
 
-test_check("rgeomstats")
+# Uncomment when start unit testing
+# test_check("rgeomstats")
