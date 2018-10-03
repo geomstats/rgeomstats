@@ -1,4 +1,4 @@
-# euclidean_space
+# Euclidean space.
 
 library(reticulate)
 gs <- import_from_path("geomstats", path = ".")
@@ -15,8 +15,8 @@ EuclideanSpace <- setRefClass("EuclideanSpace",
                                 Belongs <- function(self, point){
                                   "Evaluate if a point belongs to the Euclidean space."
                                   point <- gs$backend$to_ndarray(point, to_ndim = 2)
-                                  n_points = point$shape
-                                  points_dim = point$shape
+                                  n_points = point$shape[1]
+                                  points_dim = point$shape[2]
                                   belongs = point_dim == self$dimension
                                   belongs = gs$backend$to_ndarray(belongs, to_ndim = 1)
                                   belongs = gs$backend$to_ndarray(belongs, to_ndim = 2, axis = 1)
