@@ -5,11 +5,12 @@ library(reticulate)
 gs <- import_from_path("geomstats", path = ".")
 
 Manifold <- setRefClass("Manifold",
+                        fields = c("dimension"),
                         methods = list(
-                          
-                          initialize <- function(self, dimension){
-                            stopifnot(dimension %% 1 == 0, dimension > 0)
-                            self$dimension = dimension
+                          initialize = function(dimension){
+                          stopifnot(dimension %% 1 == 0)
+                          stopifnot(dimension > 0)
+                          .self$dimension <- dimension
                           }
                         )
 )
