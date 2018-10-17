@@ -12,25 +12,25 @@ EuclideanSpace <- setRefClass("EuclideanSpace",
                                   stopifnot(dimension > 0)
                                   .self$dimension <- dimension
                                 },
-                                
+
                                 Belongs = function(point){
                                   "Evaluate if a point belongs to the Euclidean space."
-                                  point <- gs$backend$to_ndarray(point, to_ndim = 2)
-                                  n_points <- gs$backend$shape(point)[1]
-                                  points_dim <- gs$backend$shape(point)[2]
-                                  belongs <- points_dim == .self$dimension
-                                  belongs <- gs$backend$to_ndarray(belongs, to_ndim = 1)
-                                  belongs <- gs$backend$to_ndarray(belongs, to_ndim = 2, axis = 1)
-                                  belongs <- gs$backend$tile(belongs, c(n_points, 1))
+                                  point <- ToNdarray(point, to.ndim = 2, axis = 0)
+                                  n.points <- dim(point)[1]
+                                  points.dim <- dim(point)[2]
+                                  belongs <- points.dim == .self$dimension
+                                  belongs <- ToNdarray(belongs, to.ndim = 1, axis = 0)
+                                  belongs <- ToNdarray(belongs, to.ndim = 2, axis = 1)
+                                  belongs <- gs$backend$tile(belongs, c(n.points, 1))
                                   return(belongs)
                                 },
-                                
+
                                 RandomUniform = function(n_samples = 1){
                                   "Sample in the Euclidean space with the uniform distribution."
                                   point <- replicate(dimension, (runif(n_samples) - 0.5) * 2)
                                   return(point)
                                 }
-                                
+
                               )
 )
 
@@ -42,39 +42,39 @@ EuclideanMetric <- setRefClass("EuclideanMetric",
                                    stopifnot(dimension > 0)
                                    .self$dimension <- dimension
                                  },
-                                 
-                                 InnerProductMatrix = function(base_point=None){
+
+                                 InnerProductMatrix = function(base.point=None){
                                    "Inner product matrix, independent of the base point."
                                    mat <- diag(.self$dimension)
-                                   mat <- gs$backend$to_ndarray(mat, to_ndim = 3)
+                                   mat <- ToNdarray(mat, to.ndim = 3)
                                    return(mat)
                                  },
-                                 
-                                 
-                                 Exp = function(tangent_vec, base_point){
+
+
+                                 Exp = function(tangent.vec, base.point){
                                    "The Riemannian exponential is the addition in the Euclidean space."
-                                   tangent_vec <- gs$backend$to_ndarray(tangent_vec, to_ndim = 2)
-                                   base_point <- gs$backend$to_ndarray(base_point, to_ndim = 2)
-                                   Riemexp <- base_point + tangent_vec
-                                   return(Riemexp)
+                                   tangent.vec <- ToNdarray(tangent.vec, to.ndim = 2)
+                                   base.point <- ToNdarray(base.point, to.ndim = 2)
+                                   riemexp <- base.point + tangent.vec
+                                   return(riemexp)
                                  },
-                                 
-                                 Log = function(point, base_point){
+
+                                 Log = function(point, base.point){
                                    "The Riemannian logarithm is the subtraction in the Euclidean space."
-                                   point <- gs$backend$to_ndarray(base_point, to_ndim = 2)
-                                   base_point <- gs$backend$to_ndarray(base_point, to_ndim = 2)
-                                   Riemlog <- point - base_point
-                                   return(Riemlog)
+                                   point <- ToNdarray(base.point, to.ndim = 2)
+                                   base.point <- ToNdarray(base.point, to.ndim = 2)
+                                   riemlog <- point - base.point
+                                   return(riemlog)
                                  },
-                                 
+
                                  Mean = function(points, weights=None){
                                    "The Frechet mean of (weighted) points computed with the
                                    Euclidean metric is the weighted average of the points
                                    in the Euclidean space."
-                                   Riemmean <- gs$backend$average(points, axis = 0, weights = weights)
-                                   Riemmean <- gs$backend$to_ndarray(mean, to_ndim = 2)
-                                   return(Riemmean)
+                                   riemmean <- weighted.mean(points, weights = weights)
+                                   riemmean <- ToNdarray(mean, to.ndim = 2)
+                                   return(riemmean)
                                  }
                                )
-                               
+
 )

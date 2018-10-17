@@ -8,9 +8,9 @@ Manifold <- setRefClass("Manifold",
                         fields = "dimension",
                         methods = list(
                           initialize = function(dimension){
-                          stopifnot(dimension %% 1 == 0)
-                          stopifnot(dimension > 0)
-                          .self$dimension <- dimension
+                            stopifnot(dimension %% 1 == 0)
+                            stopifnot(dimension > 0)
+                            .self$dimension <- dimension
                           }
                         )
 )

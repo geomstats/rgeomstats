@@ -3,17 +3,24 @@
 library(reticulate)
 gs <- import_from_path("geomstats", path = ".")
 
-
-manifold <- Manifold$new(dimension = 3)
-manifold$dimension == 3
-
-SetUp <- function(){
   rand <<- ceiling(10*runif(1))
   manifold <<- Manifold$new(dimension = rand)
-}
 
-TestDimension <- function(){
-  result <<- manifold$dimension
-  expected <<- rand
-  stopifnot(result == expected)
+
+
+test_that("testing dimension",{
+  TestDimension <- function(){
+    result <<- manifold$dimension
+    expected <<- rand
+    test.dimension = result == expected
+    return(test.dimension)
+  }
+  expect_true(TestDimension())
+})
+
+expect_true()
+
+TestBelongs <- function(){
+  point <- euclidean.space$RandomUniform()
+  belongs <- euclidean.space$Belongs(point)
 }

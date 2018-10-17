@@ -1,19 +1,20 @@
 # Unit tests for Euclidean Space
 
-dimension=3;
-length(euclidean.space$RandomUniform()) ==
-
-SetUp <- function(){
+setUp <- function(){
   rand <<- ceiling(10*runif(1))
   euclidean.space <<- EuclideanSpace$new(dimension = rand)
 }
 
-TestDimension <- function(){
-  result <<- euclidean.space$dimension
-  expected <<- rand
-  stopifnot(result == expected)
-}
+test_that("instantiating random dimension 1-10", {
+  rand <<- ceiling(10*runif(1))
+  euclidean.space <<- EuclideanSpace$new(dimension = rand)
 
-TestBelongs <- function(){
-  euclidean.space$Belongs(c(runif(euclidean.space$dimension)))
-}
+  expect_equal(euclidean.space$dimension,rand)
+})
+
+
+test_that("RandomUniform and Belongs together", {
+  point <- array(euclidean.space$RandomUniform())
+  belongs <- euclidean.space$Belongs(point)
+  expect_true(belongs)
+})
