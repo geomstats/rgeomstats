@@ -1,6 +1,6 @@
 ToNdarray <- function(x, to.ndim, axis = 0){
   CurrentNdim <- length(dim(x))
-  if (CurrentNdim == to.ndim - 1){
+  if (CurrentNdim == to.ndim - 1) {
     if (axis == 0) {
       NewDim <- c(1, dim(x))
       NewX <- array(x,dim = NewDim)
