@@ -1,4 +1,4 @@
-ToNdarray <- function(x, to.ndim, axis = 0){
+ToNdarray <- function(x, to.ndim, axis = 0) {
   CurrentNdim <- length(dim(x))
   if (CurrentNdim == to.ndim - 1) {
     if (axis == 0) {
