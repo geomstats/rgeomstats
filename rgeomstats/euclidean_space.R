@@ -1,8 +1,5 @@
 # Euclidean space.
 
-library(reticulate)
-gs <- import_from_path("geomstats", path = ".")
-
 EuclideanSpace <- setRefClass("EuclideanSpace",
                               contains = "Manifold",
                               fields = "dimension",
@@ -21,7 +18,7 @@ EuclideanSpace <- setRefClass("EuclideanSpace",
                                   belongs <- points.dim == .self$dimension
                                   belongs <- ToNdarray(belongs, to.ndim = 1, axis = 0)
                                   belongs <- ToNdarray(belongs, to.ndim = 2, axis = 1)
-                                  belongs <- gs$backend$tile(belongs, c(n.points, 1))
+                                  belongs <- rep(belongs, n.points)
                                   return(belongs)
                                 },
 
@@ -36,6 +33,7 @@ EuclideanSpace <- setRefClass("EuclideanSpace",
 
 
 EuclideanMetric <- setRefClass("EuclideanMetric",
+                               fields = "dimension",
                                methods = list(
                                  initialize = function(dimension){
                                    stopifnot(dimension %% 1 == 0)
