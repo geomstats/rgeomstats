@@ -1,4 +1,6 @@
 library(testthat)
 library(rgeomstats)
-# Uncomment when start unit testing
+library(devtools)
+
 test_check("rgeomstats")
+devtools::test()

@@ -17,5 +17,3 @@ test_that("Tests ToNdArray to 2 axis", {
   axis.2 <- ToNdarray(x, 3, 2)
   expect_equivalent(dim(axis.2), c(3, 4, 1))
 })
-
-
