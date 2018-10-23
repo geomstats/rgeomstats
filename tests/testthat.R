@@ -1,4 +1,5 @@
 library(testthat)
 library(rgeomstats)
-devtools::check()
+
+test_check("rgeomstats")
 
