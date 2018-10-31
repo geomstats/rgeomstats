@@ -1,5 +1,3 @@
-# special_orthogonal_group.R
-
 # The special orthogonal group SO(n),
 # i.e. the Lie group of rotations in n dimensions.
 
@@ -38,6 +36,5 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
 
                                           return(vec.dim == .self$dimension)
                                         }
-
                                       )
 )
