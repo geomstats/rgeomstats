@@ -35,6 +35,42 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
                                           vec.dim <-  dim(point)[2]
 
                                           return(vec.dim == .self$dimension)
+                                        },
+                                        Regularize = function(point){
+                                          "In 3D, regularize the norm of the rotation vector,
+                                          to be between 0 and pi, following the axis-angle
+                                          representation's convention.
+                                          If the angle angle is between pi and 2pi,
+                                          the function computes its complementary in 2pi and
+                                          inverts the direction of the rotation axis."
+                                          point <- ToNdarray(point, to.ndim = 2)
+                                          n.points <- dim(point)[1]
+                                          regularized.point <- point
+
+                                          if (.self$n == 3){
+                                            # applys norm to each row
+                                            angle <- apply(regularized.point, 1, function(x){sqrt(sum(x^2))})
+                                            mask.0 <- (angle < .Machine$double.eps ^ 0.5)
+                                            mask.not.0 <- !mask.0
+                                            mask.pi <- ((angle - pi) < .Machine$double.eps ^ 0.5)
+
+                                            k <- floor(angle / (2 * pi) + .5)
+
+                                            norms.ratio <- array(0,c(n.points,1))
+
+                                            # This avoids division by 0.
+                                            angle <- angle + mask.0 * 1.
+
+                                            norms.ratio <- norms.ratio + mask.not.0 * (1 - 2 * pi * k / angle)
+                                            norms.ratio <- norms.ratio + mask.0 * 1.
+                                            norms.ratio <- norms.ratio + mask.pi * (pi / angle
+                                                                                          - (1 - 2 * pi * k / angle))
+
+                                            regularized.point <- t(sweep(t(regularized.point),MARGIN=2,norms.ratio,`*`))
+
+                                          }
+                                          stopifnot(length(dim(regularized.point)) == 2)
+                                          return(regularized.point)
                                         }
                                       )
 )
