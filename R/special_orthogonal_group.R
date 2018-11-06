@@ -67,7 +67,7 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
                                             norms.ratio <- norms.ratio + mask.pi * (pi / angle
                                                                                           - (1 - 2 * pi * k / angle))
 
-                                            regularized.point <- apply(regularized.point, 2, function(x){x*norms.ratio})
+                                            regularized.point <- apply(regularized.point, 2, function(x){x * norms.ratio})
                                             if (is.null(dim(regularized.point))) {
                                               regularized.point <- ToNdarray(array(regularized.point), to.ndim = 2)
                                             }
