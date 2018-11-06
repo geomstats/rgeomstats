@@ -36,6 +36,7 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
 
                                           return(vec.dim == .self$dimension)
                                         },
+
                                         Regularize = function(point){
                                           "In 3D, regularize the norm of the rotation vector,
                                           to be between 0 and pi, following the axis-angle
@@ -66,8 +67,10 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
                                             norms.ratio <- norms.ratio + mask.pi * (pi / angle
                                                                                           - (1 - 2 * pi * k / angle))
 
-                                            regularized.point <- t(sweep(t(regularized.point),MARGIN=2,norms.ratio,`*`))
-
+                                            regularized.point <- apply(regularized.point, 2, function(x){x*norms.ratio})
+                                            if (is.null(dim(regularized.point))) {
+                                            regularized.point <- ToNdarray(array(regularized.point),to.ndim = 2)
+                                            }
                                           }
                                           stopifnot(length(dim(regularized.point)) == 2)
                                           return(regularized.point)
