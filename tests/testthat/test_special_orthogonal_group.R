@@ -48,3 +48,11 @@ test_that("Tests Regularize", {
 
 
 })
+
+test_that("Tests Skew Matrix From Vector", {
+  sp <- SpecialOrthogonalGroup$new(n = 3)
+  vec <- ToNdarray(array(runif(3)),to.ndim = 2)
+  result <- array(sp$SkewMatrixFromVector(vec),dim=c(3,3))
+  expect_equivalent(vec %*% result, ToNdarray(array(c(0,0,0)),to.ndim = 2))
+
+})
