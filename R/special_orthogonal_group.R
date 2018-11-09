@@ -49,23 +49,21 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
       regularized.point <- point
 
       if (.self$n == 3) {
-        # applys norm to each row
-        angle <- apply(regularized.point, 1, function(x){sqrt(sum(x^2))})
+        angle <- apply(regularized.point, 1, function(x){sqrt(sum(x ^ 2))})
         mask.0 <- (angle < .Machine$double.eps ^ 0.5)
         mask.not.0 <- !mask.0
         mask.pi <- ((angle - pi) < .Machine$double.eps ^ 0.5)
 
         k <- floor(angle / (2 * pi) + .5)
 
-        norms.ratio <- array(0,c(n.points,1))
+        norms.ratio <- array(0, c(n.points, 1))
 
         # This avoids division by 0.
         angle <- angle + mask.0 * 1.
 
-        norms.ratio <- norms.ratio + mask.not.0 * (1 - 2 * pi * k / angle)
-        norms.ratio <- norms.ratio + mask.0 * 1.
-        norms.ratio <- norms.ratio + mask.pi * (pi / angle
-                                                      - (1 - 2 * pi * k / angle))
+        norms.ratio[mask.not.0] <- 1 - 2 * pi * k / angle
+        norms.ratio[mask.0] <- 1
+        norms.ratio[mask.pi] <-  (pi / angle[mask.pi])
 
         regularized.point <- apply(regularized.point, 2, function(x){x * norms.ratio})
         if (is.null(dim(regularized.point))) {
@@ -102,25 +100,21 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
         basis.vec.3 <- ToNdarray(array(c(0, 0, 1) * n.vecs), to.ndim = 2)
 
         ApplyLeviCivitaSymbol <- function(vec) {
-          array(
-          cbind(
+          array(cbind(
           vec %*% levi.civita.symbol[1, , ],
           vec %*% levi.civita.symbol[2, , ],
           vec %*% levi.civita.symbol[3, , ]),
-          dim = c(3,3))
+          dim = c(3, 3))
         }
 
         cross.prod.1 <- vec %*% ApplyLeviCivitaSymbol(basis.vec.1)
         cross.prod.2 <- vec %*% ApplyLeviCivitaSymbol(basis.vec.2)
         cross.prod.3 <- vec %*% ApplyLeviCivitaSymbol(basis.vec.3)
 
-        cross.prod.1 <- ToNdarray(cross.prod.1, to.ndim = 3, axis = 1)
-        cross.prod.2 <- ToNdarray(cross.prod.2, to.ndim = 3, axis = 1)
-        cross.prod.3 <- ToNdarray(cross.prod.3, to.ndim = 3, axis = 1)
-        skew.mat <- array(c(cross.prod.1,cross.prod.2,cross.prod.3), dim = c(1,3,3))
+        skew.mat <- array(c(cross.prod.1, cross.prod.2, cross.prod.3), dim = c(1, 3, 3))
       }
       stopifnot(length(dim(skew.mat)) == 3)
       return(skew.mat)
     }
-                                      )
+  )
 )
