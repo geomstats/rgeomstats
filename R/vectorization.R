@@ -14,7 +14,7 @@ ToNdarray <- function(x, to.ndim, axis = 0) {
   } else if (CurrentNdim == to.ndim) {
     NewX <- x
   } else {
-    warning()
+    warning(cat("We can increase ndim only by 1. Here: ndim of x is:", length(dim(x))))
   }
   return(NewX)
 }
