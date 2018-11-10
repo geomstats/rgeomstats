@@ -55,3 +55,36 @@ test_that("Tests Skew Matrix From Vector", {
   result <- array(so3$SkewMatrixFromVector(vec),dim = c(3,3))
   expect_equivalent(vec %*% result, ToNdarray(array(c(0,0,0)), to.ndim = 2))
 })
+
+
+test_that("Tests Jacobian Translation", {
+  so3 <- SpecialOrthogonalGroup$new(n = 3)
+  elements <- list(
+  with.angle.0 = array(c(0,0,0)),
+  with.angle.close.0 = 1e-10 * array(c(1, -1, 1)),
+  with.angle.close.pi.low = ((pi - 1e-9) / sqrt(2) * array(c(0, 1, -1))),
+  with.angle.pi = pi / sqrt(3) * array(c(1, 1, -1)),
+  with.angle.close.pi.high = ((pi + 1e-9) / sqrt(3) * array(c(-1, 1, -1))),
+  with.angle.in.pi.2pi = ((pi + 0.3) / sqrt(5) * array(c(-2, 1, 0))),
+  with.angle.close.2pi.low = ((2 * pi - 1e-9) / sqrt(6) * array(c(2, 1, -1))),
+  with.angle.2pi = 2 * pi / sqrt(3) * array(c(1, 1, -1)),
+  with.angle.close.2pi.high = ((2 * pi + 1e-9) / sqrt(2) * array(c(1, 0, -1)))
+  )
+
+  for (array.type in elements) {
+    point <- array.type
+    jacobian <- so3$JacobianTranslation(ToNdarray(array(point), to.ndim = 2))
+    result <- det(array(jacobian, dim = c(3,3)))
+    point <- so3$Regularize(point)
+    angle <- sqrt(sum(point ^ 2))
+    if (identical(array.type, elements$with.angle.0) ||
+        identical(array.type, elements$with.angle.close.0) ||
+        identical(array.type, elements$with.angle.2pi) ||
+        identical(array.type, elements$with.angle.2pi.high)) {
+        expected <- 1 + angle ^ 2 / 12 + angle ^ 4 / 240
+    } else {
+        expected <- angle ^ 2 / (4 * sin(angle / 2) ^ 2)
+    }
+    expect_equal(result, expected)
+  }
+})
