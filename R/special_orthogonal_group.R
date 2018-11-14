@@ -115,6 +115,72 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
       }
       stopifnot(length(dim(skew.mat)) == 3)
       return(skew.mat)
+    },
+
+    JacobianTranslation = function(point, left.or.right="left"){
+      "Compute the jacobian matrix of the differential
+      of the left/right translations from the identity to point in SO(n)."
+
+      stopifnot(left.or.right == "left" || "right")
+
+      if (.self$n == 3) {
+        point <- .self$Regularize(point)
+        n.points <- dim(point)[1]
+        angle <- sqrt(sum(point ^ 2))
+        angle <- ToNdarray((array(angle)), to.ndim = 2, axis = 1)
+
+        coef.1 <- array(0, dim = c(n.points, 1))
+        coef.2 <- array(0, dim = c(n.points, 1))
+
+        mask.0 <- (angle < .Machine$double.eps ^ 0.5)
+
+        coef.1[mask.0] <- (
+          TAYLOR.COEFFS.1.AT.0[1]
+          + TAYLOR.COEFFS.1.AT.0[3] * angle[mask.0] ^ 2
+          + TAYLOR.COEFFS.1.AT.0[5] * angle[mask.0] ^ 4
+          + TAYLOR.COEFFS.1.AT.0[7] * angle[mask.0] ^ 6)
+
+        coef.2[mask.0] <- (
+          TAYLOR.COEFFS.2.AT.0[1]
+          + TAYLOR.COEFFS.2.AT.0[3] * angle ^ 2
+          + TAYLOR.COEFFS.2.AT.0[5] * angle ^ 4
+          + TAYLOR.COEFFS.2.AT.0[7] * angle ^ 6)
+
+        mask.pi <- (abs(angle - pi) < .Machine$double.eps ^ 0.5)
+
+        delta.angle <- angle - pi
+
+        coef.1[mask.pi] <- (
+          TAYLOR.COEFFS.1.AT.PI[2] * delta.angle
+          + TAYLOR.COEFFS.1.AT.PI[3] * delta.angle ^ 2
+          + TAYLOR.COEFFS.1.AT.PI[4] * delta.angle ^ 3
+          + TAYLOR.COEFFS.1.AT.PI[5] * delta.angle ^ 4
+          + TAYLOR.COEFFS.1.AT.PI[6] * delta.angle ^ 5
+          + TAYLOR.COEFFS.1.AT.PI[7] * delta.angle ^ 6)
+        coef.2[mask.pi] <- (1 - coef.1[mask.pi]) / angle[mask.pi] ^ 2
+
+        mask.else <- !mask.0 & !mask.pi
+        angle <- angle + mask.pi
+        coef.1[mask.else] <- ((angle[mask.else] / 2)
+                              / tan(angle[mask.else] / 2))
+        coef.2[mask.else] <- ((1 - coef.1[mask.else])
+                              / angle[mask.else] ^ 2)
+        jacobian <- array(0, dim = c(n.points, .self$dimension, .self$dimension))
+
+        for (i in range(n.points)[1]:range(n.points)[2]) {
+          sign <- -1
+          if (left.or.right == "left") {
+            sign <- 1
+          }
+
+          jacobian[i, , ] <- (
+            coef.1[i] * diag(1, .self$dimension, .self$dimension)
+            + coef.2[i] * outer(point[i,], point[i,])
+            + sign * .self$SkewMatrixFromVector(ToNdarray(array(point[1, ]), to.ndim = 2))[i, , ] / 2)
+        }
+      }
+      stopifnot(length(dim(jacobian)) == 3)
+      return(jacobian)
     }
   )
 )
