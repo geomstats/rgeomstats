@@ -175,12 +175,40 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
 
           jacobian[i, , ] <- (
             coef.1[i] * diag(1, .self$dimension, .self$dimension)
-            + coef.2[i] * outer(point[i,], point[i,])
+            + coef.2[i] * outer(point[i, ], point[i, ])
             + sign * .self$SkewMatrixFromVector(ToNdarray(array(point[1, ]), to.ndim = 2))[i, , ] / 2)
         }
       }
       stopifnot(length(dim(jacobian)) == 3)
       return(jacobian)
+    },
+
+    VectorFromSkewMatrix = function(skew.mat){
+      "In 3D, compute the vector defining the cross product
+      associated to the skew-symmetric matrix skew mat.
+
+      In nD, fill a vector by reading the values
+      of the upper triangle of skew_mat."
+
+      skew.mat <- ToNdarray(skew.mat, to.ndim = 3)
+      n.skew.mats <- dim(skew.mat)[1]
+      mat.dim.1 <- dim(skew.mat)[2]
+      mat.dim.2 <- dim(skew.mat)[3]
+
+      stopifnot(mat.dim.1 == mat.dim.2)
+      stopifnot(mat.dim.2 == .self$n)
+
+      vec.dim <- .self$dimension
+      vec <- array(0, dim = c(n.skew.mats, vec.dim))
+
+      if (.self$n == 3) {
+        vec.1 <- ToNdarray(array(skew.mat[ , 3, 2]), to.ndim = 2, axis = 1)
+        vec.2 <- ToNdarray(array(skew.mat[ , 1, 3]), to.ndim = 2, axis = 1)
+        vec.3 <- ToNdarray(array(skew.mat[ , 2, 1]), to.ndim = 2, axis = 1)
+        vec <- rbind(c(vec.1, vec.2, vec.3))
+      }
+      stopifnot(length(dim(vec)) == 2)
+      return(vec)
     }
   )
 )
