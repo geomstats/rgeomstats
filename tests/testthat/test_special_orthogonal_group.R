@@ -68,12 +68,12 @@ test_that("Tests Skew Matrix From Vector", {
 })
 
 
-test_that("Tests Jacobian Translation", {
+test_that("Tests Jacobian Translation through its determinant", {
   so3 <- SpecialOrthogonalGroup$new(n = 3)
   for (array.type in elements) {
     point <- array.type
     jacobian <- so3$JacobianTranslation(ToNdarray(array(point), to.ndim = 2))
-    result <- det(array(jacobian, dim = c(3, 3)))
+    result <- det(jacobian[1, , ])
     point <- so3$Regularize(point)
     angle <- sqrt(sum(point ^ 2))
     if (identical(array.type, elements$with.angle.0) ||
