@@ -160,8 +160,6 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
         coef.2[mask.pi] <- (1 - coef.1[mask.pi]) / angle[mask.pi] ^ 2
 
         mask.else <- !mask.0 & !mask.pi
-
-        # This avoids division by 0.
         angle <- angle + mask.pi
         coef.1[mask.else] <- ((angle[mask.else] / 2)
                               / tan(angle[mask.else] / 2))
