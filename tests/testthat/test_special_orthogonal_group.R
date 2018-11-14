@@ -52,15 +52,15 @@ test_that("Tests Regularize", {
 test_that("Tests Skew Matrix From Vector", {
   so3 <- SpecialOrthogonalGroup$new(n = 3)
   vec <- ToNdarray(array(runif(3)), to.ndim = 2)
-  result <- array(so3$SkewMatrixFromVector(vec),dim = c(3,3))
-  expect_equivalent(vec %*% result, ToNdarray(array(c(0,0,0)), to.ndim = 2))
+  result <- array(so3$SkewMatrixFromVector(vec), dim = c(3, 3))
+  expect_equivalent(vec %*% result, ToNdarray(array(c(0, 0, 0)), to.ndim = 2))
 })
 
 
 test_that("Tests Jacobian Translation", {
   so3 <- SpecialOrthogonalGroup$new(n = 3)
   elements <- list(
-  with.angle.0 = array(c(0,0,0)),
+  with.angle.0 = array(c(0, 0, 0)),
   with.angle.close.0 = 1e-10 * array(c(1, -1, 1)),
   with.angle.close.pi.low = ((pi - 1e-9) / sqrt(2) * array(c(0, 1, -1))),
   with.angle.pi = pi / sqrt(3) * array(c(1, 1, -1)),
@@ -74,7 +74,7 @@ test_that("Tests Jacobian Translation", {
   for (array.type in elements) {
     point <- array.type
     jacobian <- so3$JacobianTranslation(ToNdarray(array(point), to.ndim = 2))
-    result <- det(array(jacobian, dim = c(3,3)))
+    result <- det(array(jacobian, dim = c(3, 3)))
     point <- so3$Regularize(point)
     angle <- sqrt(sum(point ^ 2))
     if (identical(array.type, elements$with.angle.0) ||
@@ -88,3 +88,13 @@ test_that("Tests Jacobian Translation", {
     expect_equal(result, expected)
   }
 })
+
+test_that("Tests Vector From Skew Matrix", {
+  so3 <- SpecialOrthogonalGroup$new(n = 3)
+  vec <- ToNdarray(array(runif(3)), to.ndim = 2)
+  skew.mat <- so3$SkewMatrixFromVector(vec)
+  vec.from.skew.matrix <- so3$VectorFromSkewMatrix(skew.mat = skew.mat)
+  expect_equivalent(vec, vec.from.skew.matrix)
+})
+
+
