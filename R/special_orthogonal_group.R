@@ -175,7 +175,7 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
 
           jacobian[i, , ] <- (
             coef.1[i] * diag(1, .self$dimension, .self$dimension)
-            + coef.2[i] * outer(point[i,], point[i,])
+            + coef.2[i] * outer(point[i, ], point[i, ])
             + sign * .self$SkewMatrixFromVector(ToNdarray(array(point[1, ]), to.ndim = 2))[i, , ] / 2)
         }
       }
