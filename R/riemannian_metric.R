@@ -43,27 +43,6 @@ RiemannianMetric <- setRefClass("RiemannianMetric",
       return(inner.prod)
     },
 
-    InnerProductMatrix = function(base.point = NULL){
-      if (is.null(base.point)) {
-        base.point <- array(c(0, 0, 0))
-      }
-      base.point <- .self$group$Regularize(base.point)
-
-        jacobian <- .self$group$JacobianTranslation(
-          point = base.point,
-          left.or.right = .self$left.or.right)
-        stopifnot(length(dim(jacobian)) == 3)
-        inv.jacobian <- solve(jacobian)
-        inv.jacobian.transposed <- t(inv.jacobian)
-
-        inner.product.mat.at.id <- .self$InnerProductMatrixAtIdentity
-        inner.product.mat.at.id <- ToNdarray(inner.product.mat.at.id, to.ndim = 3)
-
-        metric.mat <- inv.jacobian.transposed %*% inner.product.mat.at.id
-        metric.mat <- metric.mat %*% inv.jacobian
-        return(metric.mat)
-    },
-
     SquaredNorm = function(vector, base.point= NULL){
       sq.norm <- .self$InnerProduct(vector, vector, base.point)
       return(sq.norm)

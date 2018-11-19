@@ -4,7 +4,7 @@ InvariantMetric <- setRefClass("InvariantMetric",
   fields = c("group", "inner.product.mat.at.identity", "left.or.right"),
   contains = "RiemannianMetric",
   methods = list(
-    initialize = function(group, inner.product.mat.at.identity=NULL,
+    initialize = function(group, inner.product.mat.at.identity = NULL,
                           left.or.right = "left") {
       if (is.null(inner.product.mat.at.identity)) {
         inner.product.mat.at.identity <- diag(1, group$dimension)
@@ -52,6 +52,27 @@ InvariantMetric <- setRefClass("InvariantMetric",
     inner.prod <- .self$InnerProductAtIdentity(tangent.vec.a.at.id,
                                                 tangent.vec.b.at.id)
     return(inner.prod)
+    },
+
+    InnerProductMatrix = function(base.point = NULL){
+      if (is.null(base.point)) {
+        base.point <- array(c(0, 0, 0))
+      }
+      base.point <- .self$group$Regularize(base.point)
+
+      jacobian <- .self$group$JacobianTranslation(
+        point = base.point,
+        left.or.right = .self$left.or.right)
+      stopifnot(length(dim(jacobian)) == 3)
+      inv.jacobian <- solve(jacobian)
+      inv.jacobian.transposed <- t(inv.jacobian)
+
+      inner.product.mat.at.id <- .self$InnerProductMatrixAtIdentity
+      inner.product.mat.at.id <- ToNdarray(inner.product.mat.at.id, to.ndim = 3)
+
+      metric.mat <- inv.jacobian.transposed %*% inner.product.mat.at.id
+      metric.mat <- metric.mat %*% inv.jacobian
+      return(metric.mat)
     }
   )
 )
