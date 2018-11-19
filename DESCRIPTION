@@ -14,3 +14,5 @@ RoxygenNote: 6.1.0
 Suggests:
     testthat,
     covr
+Collate: 
+  'manifold.R' 'euclidean_space.R' 'riemannian_metric.R' 'invariant_metric.R' 'special_orthogonal_group.R' 'vectorization.R'
