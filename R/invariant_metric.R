@@ -1,3 +1,5 @@
+#' @include riemannian_metric.R
+
 InvariantMetric <- setRefClass("InvariantMetric",
   fields = c("group", "inner.product.mat.at.identity", "left.or.right"),
   contains = "RiemannianMetric",

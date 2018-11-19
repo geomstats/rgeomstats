@@ -1,5 +1,5 @@
 # Euclidean space.
-
+#' @include manifold.R
 EuclideanSpace <- setRefClass("EuclideanSpace",
                               contains = "Manifold",
                               fields = "dimension",
