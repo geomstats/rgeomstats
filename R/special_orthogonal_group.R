@@ -30,7 +30,7 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
     Belongs = function(point){
       "Evaluate if a point belongs to SO(n)."
       # for point type vector
-      if(length(dim(point)) == 1) {
+      if (length(dim(point)) == 1) {
         point <- ToNdarray(point, to.ndim = 2)
       }
       vec.dim <-  dim(point)[length(dim(point))]
@@ -67,7 +67,7 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
         norms.ratio[mask.0] <- 1
         norms.ratio[mask.pi] <-  (pi / angle[mask.pi])
 
-        regularized.point <- apply(regularized.point, 2, function(x){x * c(norms.ratio)})
+        regularized.point <- regularized.point * c(norms.ratio)
         if (is.null(dim(regularized.point))) {
           regularized.point <- ToNdarray(array(regularized.point), to.ndim = 2)
         }
@@ -118,7 +118,7 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
 
         skew.mat <- array(c(cross.prod.1,
                             cross.prod.2,
-                            cross.prod.3), dim = c(n.vecs, 3, 3))
+                            cross.prod.3), dim = c(n.vecs, .self$n, .self$n))
       }
       stopifnot(length(dim(skew.mat)) == 3)
       return(skew.mat)
@@ -249,7 +249,7 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
       if (.self$n == 3) {
         trace <- colSums(apply(rot.mat, 1, diag))
 
-        #stopifnot(dim(trace) == c(n.rot.mats, 1)
+        stopifnot(dim(trace) == c(n.rot.mats, 1))
 
         clip <- function(x, x.min, x.max){
           x[x < x.min] <- x.min
@@ -306,25 +306,23 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
 
         rot.vec.pi <- array(0, dim = c(n.rot.mats, .self$dimension))
 
-        mask.a <- a == 1:3
-        mask.b <- b == 1:3
-        mask.c <- c == 1:3
+        mask.a <- cbind(
+        rep(a == 1, n.rot.mats),
+        rep(a == 2, n.rot.mats),
+        rep(a == 3, n.rot.mats)
+        )
 
-        mask.a <- ToNdarray(array(mask.a), to.ndim = 2, axis = 1)
-        mask.b <- ToNdarray(array(mask.b), to.ndim = 2, axis = 1)
-        mask.c <- ToNdarray(array(mask.c), to.ndim = 2, axis = 1)
+        mask.b <- cbind(
+          rep(b == 1, n.rot.mats),
+          rep(b == 2, n.rot.mats),
+          rep(b == 3, n.rot.mats)
+        )
 
-        mask.a <- t(mask.a)
-        mask.b <- t(mask.b)
-        mask.c <- t(mask.c)
-
-        mask.a <- rep(mask.a, n.rot.mats)
-        mask.b <- rep(mask.b, n.rot.mats)
-        mask.c <- rep(mask.c, n.rot.mats)
-
-        mask.a <- t(array(mask.a, dim = c(3, n.rot.mats)))
-        mask.b <- t(array(mask.b, dim = c(3, n.rot.mats)))
-        mask.c <- t(array(mask.c, dim = c(3, n.rot.mats)))
+        mask.c <- cbind(
+          rep(c == 1, n.rot.mats),
+          rep(c == 2, n.rot.mats),
+          rep(c == 3, n.rot.mats)
+        )
 
         rot.vec.pi <- rot.vec.pi + mask.pi * mask.a * c(sq.root) / 2
 
