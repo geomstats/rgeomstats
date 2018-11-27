@@ -178,7 +178,6 @@ test_that("Tests Compose point and its inverse", {
   point <- array(runif(3))
   point <- so3$Regularize(point)
   result <- so3$Compose(so3$Inverse(point), point)
-
   expect_equivalent(array(0, dim = c(1, 3)), result)
 })
 
