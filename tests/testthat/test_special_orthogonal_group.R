@@ -95,3 +95,89 @@ test_that("Tests Vector From Skew Matrix", {
   vec.from.skew.matrix <- so3$VectorFromSkewMatrix(skew.mat = skew.mat)
   expect_equivalent(vec, vec.from.skew.matrix)
 })
+
+test_that("Tests Vector From Rotation Matrix", {
+  so3 <- SpecialOrthogonalGroup$new(n = 3)
+  rot.mat <- rbind(c(1, 0, 0),
+                   c(0, cos(.12), -sin(.12)),
+                   c(0, sin(.12), cos(.12)))
+  rot.mat <- ToNdarray(rot.mat, to.ndim = 3)
+  rot.vec <- so3$RotationVectorFromMatrix(rot.mat)
+  expected <- ToNdarray(array(c(.12, 0, 0)), to.ndim = 2)
+  expect_equivalent(rot.vec, expected)
+})
+
+test_that("Tests Matrix From Rotation Vector", {
+  so3 <- SpecialOrthogonalGroup$new(n = 3)
+
+  rot.vec.0 <- array(c(0, 0, 0))
+  matrix.0 <- so3$MatrixFromRotationVector(rot.vec.0)
+  expected <- ToNdarray(diag(3), to.ndim = 3)
+  expect_equivalent(matrix.0, expected)
+
+  rot.vec.1 <- array(c(pi / 3, 0, 0))
+  matrix.1 <- so3$MatrixFromRotationVector(rot.vec.1)
+  expected <- rbind(c(1, 0, 0),
+                    c(0, .5, -sqrt(3) / 2),
+                    c(0, sqrt(3) / 2, .5))
+  expected <- ToNdarray(expected, to.ndim = 3)
+  expect_equivalent(matrix.1, expected)
+
+  rot.vec.2 <- array(c(0, pi / 3, 0))
+  matrix.2 <- so3$MatrixFromRotationVector(rot.vec.2)
+  expected <- rbind(c(.5, 0, sqrt(3) / 2),
+                    c(0, 1, 0),
+                    c(-sqrt(3) / 2, 0, .5))
+  expected <- ToNdarray(expected, to.ndim = 3)
+  expect_equivalent(matrix.2, expected)
+
+  rot.vec.3 <- array(c(0, 0, pi / 3))
+  matrix.3 <- so3$MatrixFromRotationVector(rot.vec.3)
+  expected <- rbind(c(.5, -sqrt(3) / 2, 0),
+                    c(sqrt(3) / 2, .5, 0),
+                    c(0, 0, 1))
+  expected <- ToNdarray(expected, to.ndim = 3)
+  expect_equivalent(matrix.3, expected)
+
+})
+
+test_that("Tests Compose with the identity", {
+  so3 <- SpecialOrthogonalGroup$new(n = 3)
+  identity <- array(c(0, 0, 0))
+  point <- array(runif(3))
+
+  left.identity.compose <- so3$Compose(identity, point)
+  right.identity.compose <- so3$Compose(point, identity)
+
+  expected <- so3$Regularize(point)
+
+  expect_equivalent(left.identity.compose, expected)
+  expect_equivalent(right.identity.compose, expected)
+})
+
+test_that("Tests MatrixFromRotationVector and RotationVectorFromMatrix", {
+  so3 <- SpecialOrthogonalGroup$new(n = 3)
+  point <- array(runif(3))
+  point <- so3$Regularize(point)
+  result <- so3$RotationVectorFromMatrix(so3$MatrixFromRotationVector(point))
+
+  expect_equivalent(point, result)
+})
+
+test_that("Tests GroupExpFromIdentity and GroupLogFromIdentity", {
+  so3 <- SpecialOrthogonalGroup$new(n = 3)
+  point <- array(runif(3))
+  point <- so3$Regularize(point)
+  result <- so3$GroupExpFromIdentity(so3$GroupLogFromIdentity(point))
+
+  expect_equivalent(point, result)
+})
+
+test_that("Tests Compose point and its inverse", {
+  so3 <- SpecialOrthogonalGroup$new(n = 3)
+  point <- array(runif(3))
+  point <- so3$Regularize(point)
+  result <- so3$Compose(so3$Inverse(point), point)
+  expect_equivalent(array(0, dim = c(1, 3)), result)
+})
+

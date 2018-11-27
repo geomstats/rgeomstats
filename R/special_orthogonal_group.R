@@ -30,10 +30,10 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
     Belongs = function(point){
       "Evaluate if a point belongs to SO(n)."
       # for point type vector
-
-      point <- ToNdarray(point, to.ndim = 2)
-      vec.dim <-  dim(point)[2]
-
+      if (length(dim(point)) == 1) {
+        point <- ToNdarray(point, to.ndim = 2)
+      }
+      vec.dim <-  dim(point)[length(dim(point))]
       return(vec.dim == .self$dimension)
     },
 
@@ -44,15 +44,17 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
       If the angle angle is between pi and 2pi,
       the function computes its complementary in 2pi and
       inverts the direction of the rotation axis."
+      if (length(dim(point)) == 1){
       point <- ToNdarray(point, to.ndim = 2)
+      }
       n.points <- dim(point)[1]
       regularized.point <- point
 
       if (.self$n == 3) {
         angle <- apply(regularized.point, 1, function(x){sqrt(sum(x ^ 2))})
-        mask.0 <- (angle < .Machine$double.eps ^ 0.5)
+        mask.0 <- (abs(angle) < .Machine$double.eps ^ 0.5)
         mask.not.0 <- !mask.0
-        mask.pi <- ((angle - pi) < .Machine$double.eps ^ 0.5)
+        mask.pi <- (abs(angle - pi) < .Machine$double.eps ^ 0.5)
 
         k <- floor(angle / (2 * pi) + .5)
 
@@ -65,11 +67,12 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
         norms.ratio[mask.0] <- 1
         norms.ratio[mask.pi] <-  (pi / angle[mask.pi])
 
-        regularized.point <- apply(regularized.point, 2, function(x){x * norms.ratio})
+        regularized.point <- regularized.point * c(norms.ratio)
         if (is.null(dim(regularized.point))) {
           regularized.point <- ToNdarray(array(regularized.point), to.ndim = 2)
         }
       }
+      regularized.point <- array(regularized.point, dim = c(n.points, 3))
       stopifnot(length(dim(regularized.point)) == 2)
       return(regularized.point)
     },
@@ -78,7 +81,9 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
       "In 3D, compute the skew-symmetric matrix,
       known as the cross-product of a vector,
       associated to the vector vec."
-      vec <- ToNdarray(vec, to.ndim = 2)
+      if (length(dim(vec)) == 1) {
+        vec <- ToNdarray(vec, to.ndim = 2)
+      }
       n.vecs <- dim(vec)[1]
       vec.dim <- dim(vec)[2]
       if (.self$n == 3) {
@@ -111,7 +116,9 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
         cross.prod.2 <- vec %*% ApplyLeviCivitaSymbol(basis.vec.2)
         cross.prod.3 <- vec %*% ApplyLeviCivitaSymbol(basis.vec.3)
 
-        skew.mat <- array(c(cross.prod.1, cross.prod.2, cross.prod.3), dim = c(1, 3, 3))
+        skew.mat <- array(c(cross.prod.1,
+                            cross.prod.2,
+                            cross.prod.3), dim = c(n.vecs, .self$n, .self$n))
       }
       stopifnot(length(dim(skew.mat)) == 3)
       return(skew.mat)
@@ -189,7 +196,6 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
 
       In nD, fill a vector by reading the values
       of the upper triangle of skew_mat."
-
       skew.mat <- ToNdarray(skew.mat, to.ndim = 3)
       n.skew.mats <- dim(skew.mat)[1]
       mat.dim.1 <- dim(skew.mat)[2]
@@ -205,10 +211,250 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
         vec.1 <- ToNdarray(array(skew.mat[ , 3, 2]), to.ndim = 2, axis = 1)
         vec.2 <- ToNdarray(array(skew.mat[ , 1, 3]), to.ndim = 2, axis = 1)
         vec.3 <- ToNdarray(array(skew.mat[ , 2, 1]), to.ndim = 2, axis = 1)
-        vec <- rbind(c(vec.1, vec.2, vec.3))
+        vec <- cbind(c(vec.1, vec.2, vec.3))
       }
+      vec <- array(vec, dim = c(n.skew.mats, 3))
       stopifnot(length(dim(vec)) == 2)
       return(vec)
+    },
+
+    RotationVectorFromMatrix = function(rot.mat){
+      "In 3D, convert rotation matrix to rotation vector
+      (axis-angle representation).
+
+      Get the angle through the trace of the rotation matrix:
+      The eigenvalues are:
+      1, cos(angle) + i sin(angle), cos(angle) - i sin(angle)
+      so that: trace = 1 + 2 cos(angle), -1 <= trace <= 3
+
+      Get the rotation vector through the formula:
+      S_r = angle / ( 2 * sin(angle) ) (R - R^T)
+
+      For the edge case where the angle is close to pi,
+      the formulation is derived by going from rotation matrix to unit
+      quaternion to axis-angle:
+      r = angle * v / |v|, where (w, v) is a unit quaternion.
+
+      In nD, the rotation vector stores the n(n-1)/2 values of the
+      skew-symmetric matrix representing the rotation."
+      if (length(dim(rot.mat)) == 2) {
+        rot.mat <- ToNdarray(rot.mat, to.ndim = 3)
+      }
+      n.rot.mats <- dim(rot.mat)[1]
+      mat.dim.1 <- dim(rot.mat)[2]
+      mat.dim.2 <- dim(rot.mat)[3]
+      stopifnot(mat.dim.1 == mat.dim.2)
+      stopifnot(mat.dim.1 == .self$n)
+
+      if (.self$n == 3) {
+        trace <- colSums(apply(rot.mat, 1, diag))
+
+        stopifnot(dim(trace) == c(n.rot.mats, 1))
+
+        clip <- function(x, x.min, x.max){
+          x[x < x.min] <- x.min
+          x[x > x.max] <- x.max
+          return(x)
+        }
+
+        cos.angle <- .5 * (trace - 1)
+        cos.angle <- clip(cos.angle, -1, 1)
+        angle <- acos(cos.angle)
+
+        rot.mat.transpose <- aperm(rot.mat, c(1, 3, 2))
+
+        rot.vec <- .self$VectorFromSkewMatrix(rot.mat - rot.mat.transpose)
+
+        mask.0 <- (abs(angle) < .Machine$double.eps ^ 0.5)
+        rot.vec <- rot.vec * (1 + mask.0 * (.5 - (trace - 3) / 12 - 1))
+        mask.pi <- (abs(angle - pi) < .Machine$double.eps ^ 0.5)
+
+        mask.else <- !mask.0 & !mask.pi
+        # choose the largest diagonal element
+        # to avoid a square root of a negative number
+
+        rot.mat.pi <- apply(rot.mat, c(2, 3), function(x){x * mask.pi})
+        rot.mat.pi <- ToNdarray(rot.mat.pi, to.ndim = 3)
+
+        a <- array(0)
+        rot.mat.pi.00 <- ToNdarray(
+          array(rot.mat.pi[ , 1, 1]), to.ndim = 2, axis = 1)
+        rot.mat.pi.11 <- ToNdarray(
+          array(rot.mat.pi[ , 2, 2]), to.ndim = 2, axis = 1)
+        rot.mat.pi.22 <- ToNdarray(
+          array(rot.mat.pi[ , 3, 3]), to.ndim = 2, axis = 1)
+        rot.mat.pi.diagonal <- cbind(
+            rot.mat.pi.00,
+            rot.mat.pi.11,
+            rot.mat.pi.22)
+        a <- apply(rot.mat.pi.diagonal, 1, which.max)[1]
+        b <- (a) %% 3 + 1
+        c <- (a + 1) %% 3 + 1
+
+        # compute the axis vector
+        sq.root <- array(0, dim = c(n.rot.mats, 1))
+
+        aux <- sqrt(
+          mask.pi * (
+            rot.mat[ , a, a]
+            - rot.mat[ , b, b]
+            - rot.mat[ , c, c]) + 1)
+
+        sq.root.pi <- array(aux * mask.pi, dim = c(n.rot.mats, 1))
+
+        sq.root <- sq.root + sq.root.pi
+
+        rot.vec.pi <- array(0, dim = c(n.rot.mats, .self$dimension))
+
+        mask.a <- cbind(
+        rep(a == 1, n.rot.mats),
+        rep(a == 2, n.rot.mats),
+        rep(a == 3, n.rot.mats)
+        )
+
+        mask.b <- cbind(
+          rep(b == 1, n.rot.mats),
+          rep(b == 2, n.rot.mats),
+          rep(b == 3, n.rot.mats)
+        )
+
+        mask.c <- cbind(
+          rep(c == 1, n.rot.mats),
+          rep(c == 2, n.rot.mats),
+          rep(c == 3, n.rot.mats)
+        )
+
+        rot.vec.pi <- rot.vec.pi + mask.pi * mask.a * c(sq.root) / 2
+
+        # This avoids division by 0.
+        sq.root <- sq.root + mask.0
+        sq.root <- sq.root + mask.else
+
+        rot.vec.pi.b <- array(0, c(dim(rot.vec.pi)))
+        rot.vec.pi.c <- array(0, c(dim(rot.vec.pi)))
+
+        rot.vec.pi.b <- rot.vec.pi.b + mask.b * c((rot.mat[ , b, a]
+                                                   + rot.mat[ , a, b]) / (2 * sq.root))
+
+        rot.vec.pi <- rot.vec.pi + mask.b * mask.pi
+
+        rot.vec.pi.c <- rot.vec.pi.c + mask.c * c((rot.mat[ , c, a]
+                                                   + rot.mat[ , a, c]) / (2 * sq.root))
+
+        rot.vec.pi <- rot.vec.pi + mask.pi * mask.pi * rot.vec.pi.c
+
+        norm.rot.vec.pi <- sqrt(sum(rot.vec.pi ^ 2))
+
+        # This avoids division by 0.
+        norm.rot.vec.pi <- norm.rot.vec.pi + mask.0
+        norm.rot.vec.pi <- norm.rot.vec.pi + mask.else
+
+        rot.vec <- rot.vec + mask.pi * apply(angle * rot.vec.pi, 2,
+                                             function(x){x * 1 / norm.rot.vec.pi})
+
+        # This avoid dividing by zero
+        angle <- angle + mask.0
+
+        fact <- mask.else * (c(angle) / (2 * sin(c(angle))) - 1)
+
+        rot.vec <- rot.vec * (1 + fact)
+
+      }
+      return(.self$Regularize(rot.vec))
+    },
+
+    MatrixFromRotationVector = function(rot.vec){
+      "Convert rotation vector to rotation matrix."
+
+      stopifnot(.self$Belongs(rot.vec))
+      rot.vec <- .self$Regularize(rot.vec)
+      n.rot.vecs <- dim(rot.vec)[1]
+
+      if (.self$n == 3) {
+        angle <- apply(rot.vec, 1, function(x){sqrt(sum(x ^ 2))})
+        angle <- ToNdarray(array(angle), to.ndim = 2, axis = 1)
+
+        skew.rot.vec <- .self$SkewMatrixFromVector(rot.vec)
+
+        coef.1 <- array(0, dim = c(dim(angle)))
+        coef.2 <- array(0, dim = c(dim(angle)))
+
+        mask.0 <- (abs(angle) < .Machine$double.eps ^ 0.5)
+
+        coef.1 <- coef.1 + mask.0 * (1 - (angle ^ 2) / 6)
+        coef.2 <- coef.2 + mask.0 * (1 / 2 - angle ^ 2)
+
+        mask.else <- !mask.0
+
+        # This avoids division by 0.
+        angle <- angle + mask.0
+
+        coef.1 <- coef.1 + mask.else * (sin(angle) / angle)
+        coef.2 <- mask.else * ((1 - cos(angle)) / (angle ^ 2))
+
+        term.1 <- array(0, dim = c((n.rot.vecs + .self$n * 2),
+                                   (n.rot.vecs + .self$n * 2)))
+        term.2 <- term.1
+
+        coef.1 <- c(coef.1)
+        coef.2 <- c(coef.2)
+        term.1 <- (aperm(replicate(n.rot.vecs, diag(3)), c(3, 2, 1)) + coef.1 * skew.rot.vec)
+
+        squared.skew.rot.vec <- apply(skew.rot.vec, 1, function(x){x %*% x})
+        squared.skew.rot.vec <- array(t(squared.skew.rot.vec), dim = c(n.rot.vecs, 3, 3))
+
+        term.2 <- coef.2 * squared.skew.rot.vec
+
+        rot.mat <- term.1 + term.2
+      }
+      return(rot.mat)
+    },
+
+    Compose = function(point.1, point.2){
+      "Compose two elements of SO(n)."
+
+      point.1 <- .self$Regularize(point.1)
+      point.2 <- .self$Regularize(point.2)
+
+      point.1 <- .self$MatrixFromRotationVector(point.1)
+      point.2 <- .self$MatrixFromRotationVector(point.2)
+
+      point.prod <- array(0, dim = dim(point.1))
+      for (i in 1:dim(point.1)[1]) {
+        point.prod[i, , ] <- point.1[i, , ] %*% point.2[i, , ]
+      }
+      point.prod <- .self$RotationVectorFromMatrix(point.prod)
+      point.prod <- .self$Regularize(point.prod)
+      return(point.prod)
+
+    },
+
+    Inverse = function(point){
+      "Compute the group inverse in SO(n)."
+      if (.self$n == 3){
+        inv.point <- -.self$Regularize(point)
+        return(inv.point)
+      }
+    },
+
+    RandomUniform = function(n.samples = 1){
+      "Sample in SO(n) with the uniform distribution."
+      random.point <- array(runif(n.samples * .self$dimension) * 2 - 1,
+                           dim = c(n.samples, .self$dimension))
+      random.point <- .self$Regularize(random.point)
+      return(random.point)
+    },
+
+    GroupExpFromIdentity = function(tangent.vec){
+      "Compute the group exponential of the tangent vector at the identity."
+      point <- ToNdarray(tangent.vec, to.ndim = 2)
+      return(point)
+    },
+
+    GroupLogFromIdentity = function(point){
+      "Compute the group logarithm of the point at the identity."
+      tangent.vec <- .self$Regularize(point)
+      return(tangent.vec)
     }
   )
 )
