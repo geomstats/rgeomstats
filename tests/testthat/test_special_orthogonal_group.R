@@ -98,9 +98,10 @@ test_that("Tests Vector From Skew Matrix", {
 
 test_that("Tests Vector From Rotation Matrix", {
   so3 <- SpecialOrthogonalGroup$new(n = 3)
-  rot.mat <- array(c(1, 0, 0,
-                     0, cos(.12), sin(.12),
-                     0, -sin(.12), cos(.12)), dim = c(3, 3))
+  rot.mat <- rbind(c(1, 0, 0),
+                   c(0, cos(.12), -sin(.12)),
+                   c(0, sin(.12), cos(.12)))
+  rot.mat <- ToNdarray(rot.mat, to.ndim = 3)
   rot.vec <- so3$RotationVectorFromMatrix(rot.mat)
   expected <- ToNdarray(array(c(.12, 0, 0)), to.ndim = 2)
   expect_equivalent(rot.vec, expected)
@@ -116,9 +117,10 @@ test_that("Tests Matrix From Rotation Vector", {
 
   rot.vec.1 <- array(c(pi / 3, 0, 0))
   matrix.1 <- so3$MatrixFromRotationVector(rot.vec.1)
-  expected <- array(c(1, 0, 0,
-                      0, .5, sqrt(3) / 2,
-                      0, -sqrt(3) / 2, .5), dim = c(1, 3, 3))
+  expected <- rbind(c(1, 0, 0),
+                    c(0, .5, -sqrt(3) / 2),
+                    c(0, sqrt(3) / 2, .5))
+  expected <- ToNdarray(expected, to.ndim = 3)
   expect_equivalent(matrix.1, expected)
 
   rot.vec.2 <- array(c(0, pi / 3, 0))
@@ -139,15 +141,15 @@ test_that("Tests Matrix From Rotation Vector", {
 
 })
 
-test_that("Tests Compose", {
+test_that("Tests Compose with the identity", {
   so3 <- SpecialOrthogonalGroup$new(n = 3)
-  point.1 <- array(c(0, 0, 0))
-  point.2 <- array(runif(3))
+  identity <- array(c(0, 0, 0))
+  point <- array(runif(3))
 
-  left.identity.compose <- so3$Compose(point.1, point.2)
-  right.identity.compose <- so3$Compose(point.2, point.1)
+  left.identity.compose <- so3$Compose(identity, point)
+  right.identity.compose <- so3$Compose(point, identity)
 
-  expected <- so3$Regularize(point.2)
+  expected <- so3$Regularize(point)
 
   expect_equivalent(left.identity.compose, expected)
   expect_equivalent(right.identity.compose, expected)
@@ -177,6 +179,6 @@ test_that("Tests Compose point and its inverse", {
   point <- so3$Regularize(point)
   result <- so3$Compose(so3$Inverse(point), point)
 
-  expect_equivalent(array(0, dim = c(1,3)), result)
+  expect_equivalent(array(0, dim = c(1, 3)), result)
 })
 
