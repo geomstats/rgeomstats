@@ -140,21 +140,6 @@ PoincareDisk <- setRefClass("PoincareDisk",
                                              size = size,
                                              color = col))
                             return(p)
-                          },
-
-                          DrawGeodesic = function(p, points.on.geodesic){
-                              poincare.coords <- ConvertToPoincareCoordinates(points.on.geodesic)
-                              poincare.coords.df <- data.frame(poincare.coords)
-                              p <- add_trace(p, poincare.coords.df$X1, poincare.coords.df$X2,
-                                        type = 'scatter',
-                                        mode = 'markers',
-                                        marker = list(
-                                          size = 20,
-                                          color = 'rgba(255, 182, 193, .9)',
-                                          line = list(color = 'rgba(152, 0, 0, .8)',
-                                                      width = 2)),
-                                        line = list(color='white'))
-                              return(p)
                           })
 )
 
