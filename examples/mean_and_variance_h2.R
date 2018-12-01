@@ -4,7 +4,7 @@ library(reticulate)
 setwd('/code/rgeomstats')
 source('R/visualization.R')
 
-use_python('/usr/local/bin/python3', required = T)
+# use_python('/usr/local/bin/python3', required = T)
 gs <- import("geomstats")
 
 set.seed(1004)
