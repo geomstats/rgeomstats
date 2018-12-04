@@ -1,5 +1,5 @@
-library(plotly)
-library(reticulate)
+requireNamespace(plotly, quietly = TRUE)
+requireNamespace(reticulate, quietly = TRUE)
 
 setwd('/code/rgeomstats')
 source('R/visualization.R')

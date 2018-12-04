@@ -1,6 +1,6 @@
-library(plotly)
-library(reticulate)
-library(rlist)
+requireNamespace(plotly, quietly = TRUE)
+requireNamespace(reticulate, quietly = TRUE)
+requireNamespace(rlist)
 
 use_python('/usr/local/bin/python3', required = T)
 gs <- import("geomstats")
