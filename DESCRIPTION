@@ -15,8 +15,6 @@ Imports:
     reticulate,
     rlist,
     plotly
-Depends:
-    ggplot2
 Suggests:
     testthat,
     covr
