@@ -112,10 +112,7 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
         cross.prod.2 <- vec %*% ApplyLeviCivitaSymbol(array(c(0,1,0)))
         cross.prod.3 <- vec %*% ApplyLeviCivitaSymbol(array(c(0,0,1)))
 
-        skew.mat <- array(c(cross.prod.1, cross.prod.2, cross.prod.3), dim = c(n.vecs, 3, 3))
-
-
-        skew.mat <- array(c(cross.prod.1,
+        skew.mat <- -array(c(cross.prod.1,
                             cross.prod.2,
                             cross.prod.3), dim = c(n.vecs, .self$n, .self$n))
       }
@@ -474,6 +471,5 @@ SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
       }
       return(group.log)
     }
-
   )
 )
