@@ -54,51 +54,48 @@ for (name in trials) {
   df$placeholder_name = rz
   names(df)[names(df) == "placeholder_name"] <- paste(name, "rz")
 
+  x <- x[1:6000]
+  y <- y[1:6000]
+  z <- z[1:6000]
+
+  df$placeholder_name = x
+  names(df)[names(df) == "placeholder_name"] <- paste(name, "x")
+
+  df$placeholder_name = y
+  names(df)[names(df) == "placeholder_name"] <- paste(name, "y")
+
+  df$placeholder_name = z
+  names(df)[names(df) == "placeholder_name"] <- paste(name, "z")
+
 }
 
-meanrx1.6 <- (df$`data/ur5testresult_fullspeed_payload1.6lb_1.csv rx` +
-              df$`data/ur5testresult_fullspeed_payload1.6lb_2.csv rx` +
-              df$`data/ur5testresult_fullspeed_payload1.6lb_3.csv rx`)/3
-
-meanry1.6 <- (df$`data/ur5testresult_fullspeed_payload1.6lb_1.csv ry` +
-              df$`data/ur5testresult_fullspeed_payload1.6lb_2.csv ry` +
-              df$`data/ur5testresult_fullspeed_payload1.6lb_3.csv ry`)/3
-
-meanrz1.6 <- (df$`data/ur5testresult_fullspeed_payload1.6lb_1.csv rz` +
-              df$`data/ur5testresult_fullspeed_payload1.6lb_2.csv rz` +
-              df$`data/ur5testresult_fullspeed_payload1.6lb_3.csv rz`)/3
-
-meanrx4.5 <- (df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv rx` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_2.csv rx` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv rx`)/3
-
-meanry4.5 <- (df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv ry` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_2.csv ry` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv ry`)/3
-
-meanrz4.5 <- (df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv rz` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_2.csv rz` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv rz`)/3
-
-mean.sq.error.x <- mean((meanrx1.6 - meanrx4.5) ^ 2)
-mean.sq.error.y <- mean((meanry1.6 - meanry4.5) ^ 2)
-mean.sq.error.z <- mean((meanrz1.6 - meanrz4.5) ^ 2)
-
-
 scatterplot3d(x, y, z)
+
+r1.6 <- cbind(df$`data/ur5testresult_fullspeed_payload1.6lb_3.csv rx`,
+              df$`data/ur5testresult_fullspeed_payload1.6lb_3.csv ry`,
+              df$`data/ur5testresult_fullspeed_payload1.6lb_3.csv rz`)
+
+
+r4.5 <- cbind(df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv rx`,
+              df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv ry`,
+              df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv rz`)
+
+so3 <- SpecialOrthogonalGroup(n = 3)
+group.log <- so3$GroupLog(point = r4.5, base.point = r1.6)
 
 plot_ly(
   type = "cone",
   x = c(1, 0, 0),
   y = c(0, 1, 0),
   z = c(0, 0, 1),
-  u = c(-mean.sq.error.x, 0, 0),
-  v = c(0, -mean.sq.error.y, 0),
-  w = c(0, 0, -mean.sq.error.z),
+  u = c(-sqrt(mean((group.log[,1]) ^ 2)), 0, 0),
+  v = c(0, -sqrt(mean((group.log[,2]) ^ 2)), 0),
+  w = c(0, 0, -sqrt(mean((group.log[,3]) ^ 2))),
   sizemode = "absolute",
   cmin = 0,
-  cmax = 0.03,
-
+  cmax = max(sqrt(mean((group.log[,1]) ^ 2)),
+             sqrt(mean((group.log[,2]) ^ 2)),
+             sqrt(mean((group.log[,3]) ^ 2))),
 
   anchor = "base")%>%
   add_trace(type = 'scatter3d', x = c(0,1), y = c(0,0), z = c(0,0), mode = 'lines',
@@ -108,7 +105,7 @@ plot_ly(
   add_trace(type = 'scatter3d', x = c(0,0), y = c(0,0), z = c(0,1), mode = 'lines',
             opacity = 1, line = list(width = 6, reverscale = FALSE), showlegend = FALSE)%>%
   layout(
-    title = "Mean Squared Error in Rotation Vector: 4.5lb vs 1.6lb load",
+    title = "Average Group Log in Rotation Vector: 4.5lb vs 1.6lb load",
     scene = list(
       xaxis = list(
         title = "Y",
@@ -133,47 +130,30 @@ plot_ly(
       )
     ))
 
+rcold <- cbind(df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_1.csv rx`,
+                df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_1.csv ry`,
+                df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_1.csv rz`)
 
-meanrxcold <- (df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_1.csv rx` +
-               df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_2.csv rx` +
-               df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_3.csv rx`)/3
+rwarm <- cbind(df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv rx`,
+                df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv ry`,
+                df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv rz`)
 
-meanrycold <- (df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_1.csv ry` +
-               df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_2.csv ry` +
-               df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_3.csv ry`)/3
-
-meanrzcold <- (df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_1.csv rz` +
-               df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_2.csv rz` +
-               df$`data/ur5testresult_coldstart_fullspeed_payload4.5lb_3.csv rz`)/3
-
-meanrxwarm <- (df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv rx` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_2.csv rx` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv rx`)/3
-
-meanrywarm <- (df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv ry` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_2.csv ry` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv ry`)/3
-
-meanrzwarm <- (df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv rz` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_2.csv rz` +
-              df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv rz`)/3
-
-mean.sq.error.x <- mean((meanrxcold - meanrxwarm) ^ 2)
-mean.sq.error.y <- mean((meanrycold - meanrywarm) ^ 2)
-mean.sq.error.z <- mean((meanrzcold - meanrzwarm) ^ 2)
+so3 <- SpecialOrthogonalGroup(n = 3)
+group.log <- so3$GroupLog(point = rcold, base.point = rwarm)
 
 plot_ly(
   type = "cone",
   x = c(1, 0, 0),
   y = c(0, 1, 0),
   z = c(0, 0, 1),
-  u = c(-mean.sq.error.x, 0, 0),
-  v = c(0, -mean.sq.error.y, 0),
-  w = c(0, 0, -mean.sq.error.z),
+  u = c(-sqrt(mean((group.log[,1]) ^ 2)), 0, 0),
+  v = c(0, -sqrt(mean((group.log[,2]) ^ 2)), 0),
+  w = c(0, 0, -sqrt(mean((group.log[,3]) ^ 2))),
   sizemode = "absolute",
   cmin = 0,
-  cmax = 0.03,
-
+  cmax = max(sqrt(mean((group.log[,1]) ^ 2)),
+             sqrt(mean((group.log[,2]) ^ 2)),
+             sqrt(mean((group.log[,3]) ^ 2))),
 
   anchor = "base")%>%
   add_trace(type = 'scatter3d', x = c(0,1), y = c(0,0), z = c(0,0), mode = 'lines',
@@ -183,7 +163,7 @@ plot_ly(
   add_trace(type = 'scatter3d', x = c(0,0), y = c(0,0), z = c(0,1), mode = 'lines',
             opacity = 1, line = list(width = 6, reverscale = FALSE), showlegend = FALSE)%>%
   layout(
-    title = "Mean Squared Error in Rotation Vector: Warm vs Cold Start",
+    title = "Average Group Log in Rotation Vector: Warm vs Cold Start",
     scene = list(
       xaxis = list(
         title = "Y",
