@@ -83,6 +83,11 @@ r4.5 <- cbind(df$`data/ur5testresult_fullspeed_payload4.5lb_3.csv rx`,
 so3 <- SpecialOrthogonalGroup(n = 3)
 group.log <- so3$GroupLog(point = r4.5, base.point = r1.6)
 
+jacobian.r1.6 <- so3$JacobianTranslation(r1.6)
+for (n in 1:6000){
+  group.log[n,] <- group.log[n,] %*% solve(jacobian.r1.6[n,,])
+}
+
 plot_ly(
   type = "cone",
   x = c(1, 0, 0),
@@ -140,6 +145,11 @@ rwarm <- cbind(df$`data/ur5testresult_fullspeed_payload4.5lb_1.csv rx`,
 
 so3 <- SpecialOrthogonalGroup(n = 3)
 group.log <- so3$GroupLog(point = rcold, base.point = rwarm)
+
+jacobian.rwarm <- so3$JacobianTranslation(rwarm)
+for (n in 1:6000){
+  group.log[n,] <- group.log[n,] %*% solve(jacobian.rwarm[n,,])
+}
 
 plot_ly(
   type = "cone",
