@@ -1,7 +1,3 @@
-# The special orthogonal group SO(n),
-# i.e. the Lie group of rotations in n dimensions.
-
-
 kATOL <- 1e-5
 
 TAYLOR.COEFFS.1.AT.0 <- c(1., 0.,
@@ -17,6 +13,8 @@ TAYLOR.COEFFS.1.AT.PI <- c(0., - pi / 4.,
                            - 1. / 48., - pi / 480.,
                            - 1. / 480.)
 
+#' The special orthogonal group SO(n),
+#' i.e. the Lie group of rotations in n dimensions.
 SpecialOrthogonalGroup <- setRefClass("SpecialOrthogonalGroup",
   fields = c("n", "dimension"),
   methods = list(
