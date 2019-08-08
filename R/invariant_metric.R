@@ -1,3 +1,11 @@
+#' Class for:
+#'    - left-invariant metrics
+#'    - right-invariant metrics
+#'    that exist on Lie groups.
+
+#'   Points are parameterized by the Riemannian logarithm
+#'    for the canonical left-invariant metric.
+
 #' @include riemannian_metric.R
 
 InvariantMetric <- setRefClass("InvariantMetric",

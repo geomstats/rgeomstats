@@ -1,3 +1,5 @@
+#' Riemannian and pseudo-Riemannian metrics.
+
 RiemannianMetric <- setRefClass("RiemannianMetric",
   fields = c("object"),
   methods = list(

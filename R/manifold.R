@@ -1,5 +1,5 @@
-# Manifold, i.e. a topological space that locally resembles
-# Euclidean space near each point.
+#' Manifold, i.e. a topological space that locally resembles
+#' Euclidean space near each point.
 
 Manifold <- setRefClass("Manifold",
                         fields = "dimension",

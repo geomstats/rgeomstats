@@ -1,3 +1,4 @@
+#' Utils to vectorize rgeomstats code
 ToNdarray <- function(x, to.ndim, axis = 0) {
   CurrentNdim <- length(dim(x))
   if (CurrentNdim == to.ndim - 1) {
